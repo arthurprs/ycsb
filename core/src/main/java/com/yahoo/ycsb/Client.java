@@ -21,6 +21,7 @@ package com.yahoo.ycsb;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
@@ -225,7 +226,7 @@ class WarmupThread extends ClientThread {
             if (!_workload.doRead(_db, _workloadstate)) {
                 break;
             }
-            _opsdone++;
+            _opsdone.incrementAndGet();
             curexec = System.currentTimeMillis() - startexec;
         }
         System.out.println("Warmup execution time: " + curexec);
@@ -234,17 +235,11 @@ class WarmupThread extends ClientThread {
 
     private boolean isContinue() {
         if (exectime != 0) {
-            if (curexec < exectime) {
-                return true;
-            } else
-                return false;
+            return curexec < exectime;
         }
 
         if (_opcount != 0) {
-            if (_opsdone < _opcount) {
-                return true;
-            } else
-                return false;
+            return _opsdone.get() < _opcount;
         }
 
         return false;
@@ -263,7 +258,7 @@ class ClientThread extends Thread {
     double reconnectionthroughput;
     long reconncetiontime;
 
-    int _opsdone;
+    AtomicInteger _opsdone;
     Object _workloadstate;
     Properties _props;
 
@@ -292,7 +287,7 @@ class ClientThread extends Thread {
         _dotransactions = dotransactions;
         _workload = workload;
         _opcount = opcount;
-        _opsdone = 0;
+        _opsdone = new AtomicInteger(0);
         _target = targetperthreadperms;
         _props = props;
         reconnectioncounter = 0;
@@ -301,7 +296,7 @@ class ClientThread extends Thread {
     }
 
     public int getOpsDone() {
-        return _opsdone;
+        return _opsdone.get();
     }
 
     public long getRuntime() {
@@ -384,7 +379,7 @@ class ClientThread extends Thread {
         long interval_time = start_time;
         long reconnection_throughput_time = 0;
         long interval_ops = 0;
-        while (((_opcount == 0) || (_opsdone < _opcount)) && !_workload.isStopRequested()) {
+        while (((_opcount == 0) || (_opsdone.get() < _opcount)) && !_workload.isStopRequested()) {
             long current_time = System.currentTimeMillis();
             if (current_time - interval_time > CHECK_THROUGHPUT_INTERVAL) {
                 //reconnect to the database if low throughput
@@ -419,7 +414,7 @@ class ClientThread extends Thread {
             }
 
             interval_ops++;
-            _opsdone++;
+            _opsdone.incrementAndGet();
 
             //throttle the operations
             if (_target > 0) {

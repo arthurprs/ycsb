@@ -18,8 +18,8 @@
 package com.yahoo.ycsb.measurements;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 
@@ -56,7 +56,7 @@ public class Measurements
 		return singleton;
 	}
 
-	HashMap<String,OneMeasurement> data;
+    ConcurrentHashMap<String,OneMeasurement> data;
 	boolean histogram=true;
 
 	private Properties _props;
@@ -66,10 +66,10 @@ public class Measurements
        */
 	public Measurements(Properties props)
 	{
-		data=new HashMap<String,OneMeasurement>();
+		data=new ConcurrentHashMap<String,OneMeasurement>();
 		
 		_props=props;
-		
+
 		if (_props.getProperty(MEASUREMENT_TYPE, MEASUREMENT_TYPE_DEFAULT).compareTo("histogram")==0)
 		{
 			histogram=true;
@@ -95,21 +95,17 @@ public class Measurements
       /**
        * Report a single value of a single metric. E.g. for read latency, operation="READ" and latency is the measured value.
        */
-	public synchronized void measure(String operation, int latency)
+	public void measure(String operation, int latency)
 	{
-		if (!data.containsKey(operation))
+        OneMeasurement om = data.get(operation);
+		if (om == null)
 		{
-			synchronized(this)
-			{
-				if (!data.containsKey(operation))
-				{
-					data.put(operation,constructOneMeasurement(operation));
-				}
-			}
-		}
+            data.putIfAbsent(operation, constructOneMeasurement(operation));
+            om = data.get(operation);
+        }
 		try
 		{
-			data.get(operation).measure(latency);
+			om.measure(latency);
 		}
 		catch (java.lang.ArrayIndexOutOfBoundsException e)
 		{
@@ -124,34 +120,26 @@ public class Measurements
        */
 	public void reportReturnCode(String operation, int code)
 	{
-		if (!data.containsKey(operation))
-		{
-			synchronized(this)
-			{
-				if (!data.containsKey(operation))
-				{
-					data.put(operation,constructOneMeasurement(operation));
-				}
-			}
-		}
-		data.get(operation).reportReturnCode(code);
+        OneMeasurement om = data.get(operation);
+        if (om == null)
+        {
+            data.putIfAbsent(operation, constructOneMeasurement(operation));
+            om = data.get(operation);
+        }
+		om.reportReturnCode(code);
 	}
 
     /**
      * Report a retry counts for a single DB operaiton.
      */
     public void reportRetryCount(String operation, int retryCount) {
-        if (!data.containsKey(operation))
+        OneMeasurement om = data.get(operation);
+        if (om == null)
         {
-            synchronized(this)
-            {
-                if (!data.containsKey(operation))
-                {
-                    data.put(operation,constructOneMeasurement(operation));
-                }
-            }
+            data.putIfAbsent(operation, constructOneMeasurement(operation));
+            om = data.get(operation);
         }
-        data.get(operation).reportRetryCount(retryCount);
+        om.reportRetryCount(retryCount);
     }
 	
   /**

@@ -18,7 +18,6 @@
 package com.yahoo.ycsb.generator;
 
 import java.util.Vector;
-import java.util.Random;
 
 import com.yahoo.ycsb.Utils;
 import com.yahoo.ycsb.WorkloadException;
@@ -42,6 +41,7 @@ public class DiscreteGenerator extends Generator
 
 	Vector<Pair> _values;
 	String _lastvalue;
+    double _sum = 0;
 
 	public DiscreteGenerator()
 	{
@@ -54,23 +54,16 @@ public class DiscreteGenerator extends Generator
 	 */
 	public String nextString()
 	{
-		double sum=0;
-
-		for (Pair p : _values)
-		{
-			sum+=p._weight;
-		}
-
 		double val=Utils.random().nextDouble();
 
 		for (Pair p : _values)
 		{
-			if (val<p._weight/sum)
+			if (val<p._weight/_sum)
 			{
 				return p._value;
 			}
 
-			val-=p._weight/sum;
+			val-=p._weight/_sum;
 		}
 
 		//should never get here.
@@ -109,6 +102,7 @@ public class DiscreteGenerator extends Generator
 	public void addValue(double weight, String value)
 	{
 		_values.add(new Pair(weight,value));
+        _sum += weight;
 	}
 
 }

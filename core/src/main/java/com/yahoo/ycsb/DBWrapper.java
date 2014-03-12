@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.yahoo.ycsb.measurements.Measurements;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 /**
  * Wrapper around a "real" DB that measures latencies and counts return codes.
@@ -242,4 +243,14 @@ public class DBWrapper extends DB {
         _measurements.reportReturnCode("DELETE", res);
         return res;
     }
+
+    public int readIndex(String table, String key, String indexKey, int limit, boolean orderDesc,
+                         Vector<HashMap<String, ByteIterator>> results, MutableObject<String> nextKey) {
+        return _db.readIndex(table, key, indexKey, limit, orderDesc, results, nextKey);
+    }
+
+    public int multiInsertIndex(String table, Set<String> keys, String indexKey, HashMap<String, ByteIterator> values) {
+        return _db.multiInsertIndex(table, keys, indexKey, values);
+    }
+
 }

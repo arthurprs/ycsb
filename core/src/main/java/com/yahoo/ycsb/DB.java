@@ -17,6 +17,8 @@
 
 package com.yahoo.ycsb;
 
+import org.apache.commons.lang3.mutable.MutableObject;
+
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
@@ -109,7 +111,7 @@ public abstract class DB
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
 	public abstract int scan(String table, String startkey, int recordcount, Set<String> fields, Vector<HashMap<String,ByteIterator>> result);
-	
+
 	/**
 	 * Update a record in the database. Any field/value pairs in the specified values HashMap will be written into the record with the specified
 	 * record key, overwriting any existing values with the same field name.
@@ -133,11 +135,22 @@ public abstract class DB
 	public abstract int insert(String table, String key, HashMap<String,ByteIterator> values);
 
 	/**
-	 * Delete a record from the database. 
+	 * Delete a record from the database.
 	 *
 	 * @param table The name of the table
 	 * @param key The record key of the record to delete.
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
 	public abstract int delete(String table, String key);
+
+    /* The following are used to implement ycsb workload for activity streams */
+
+    public int readIndex(String table, String key, String indexKey, int limit, boolean orderDesc,
+                         Vector<HashMap<String, ByteIterator>> results, MutableObject<String> nextKey) {
+        throw new UnsupportedClassVersionError("not implemented");
+    }
+
+    public int multiInsertIndex(String table, Set<String> keys, String indexKey, HashMap<String, ByteIterator> values) {
+        throw new UnsupportedClassVersionError("not implemented");
+    }
 }
