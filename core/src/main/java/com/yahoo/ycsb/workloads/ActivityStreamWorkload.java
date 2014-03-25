@@ -398,7 +398,7 @@ public class ActivityStreamWorkload extends Workload {
      * effects other than DB operations.
      */
     public boolean doTransaction(DB db, Object threadstate) {
-        final String op = operationchooser.nextString();
+        String op = operationchooser.nextString();
 
         switch (op) {
             case "READ":
@@ -413,16 +413,16 @@ public class ActivityStreamWorkload extends Workload {
     }
 
     public void doTransactionRead(DB db) {
-        final int keyNum = nextKeynum();
-        final String keyName = buildKeyName(keyNum);
-        final MutableObject<String> indexKey = new MutableObject<>();
-        final Vector<HashMap<String, ByteIterator>> results = new Vector<>();
+        int keyNum = nextKeynum();
+        String keyName = buildKeyName(keyNum);
+        MutableObject<String> indexKey = new MutableObject<>();
+        Vector<Map<String, ByteIterator>> results = new Vector<>();
 
         while (true) {
-            final int len = scanlength.nextInt();
-            final long st = System.nanoTime();
-            final int result = db.readIndex(table, keyName, indexKey.getValue(), len, true, results, indexKey);
-            final long en = System.nanoTime();
+            int len = scanlength.nextInt();
+            long st = System.nanoTime();
+            int result = db.readIndex(table, keyName, indexKey.getValue(), len, results, indexKey);
+            long en = System.nanoTime();
 
             measurements.measure("READ", (int) ((en - st) / 1000));
             measurements.reportReturnCode("READ", result);
@@ -433,21 +433,24 @@ public class ActivityStreamWorkload extends Workload {
     }
 
     public void doTransactionInsert(DB db) {
-        final String indexKey = Utils.newTimestampUUID();
-        final int numkeys = transactioninsertkeysequence.lastInt();
-        final int keynum = nextKeynum();
-        final int fanoutfactor = fanoutfactorgenerator.nextInt();
+        String indexKey = Utils.newTimestampUUID();
+        int numkeys = transactioninsertkeysequence.lastInt();
+        int keynum = nextKeynum();
+        int fanoutfactor = fanoutfactorgenerator.nextInt();
 
-        final Set<String> keys = new HashSet<>(fanoutfactor);
+        Set<String> keys = new HashSet<>(fanoutfactor + 1);
+        // user own timeline
+        keys.add(buildKeyName(keynum));
+        // friends timelines
         for (int i = 0; i < fanoutfactor; i++) {
             keys.add(buildKeyName(Utils.hash(keynum + i) % numkeys));
         }
 
-        final HashMap<String, ByteIterator> values = buildValues();
+        HashMap<String, ByteIterator> values = buildValues();
 
-        final long st = System.nanoTime();
-        final int result = db.multiInsertIndex(table, keys, indexKey, values);
-        final long en = System.nanoTime();
+        long st = System.nanoTime();
+        int result = db.multiInsertIndex(table, keys, indexKey, values);
+        long en = System.nanoTime();
 
         measurements.measure("WRITE", (int) ((en - st) / 1000));
         measurements.reportReturnCode("WRITE", result);

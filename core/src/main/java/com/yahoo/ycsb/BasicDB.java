@@ -17,6 +17,7 @@
 
 package com.yahoo.ycsb;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.*;
@@ -200,8 +201,8 @@ public class BasicDB extends DB {
     }
 
     @Override
-    public int readIndex(String table, String key, String indexKey, int limit, boolean orderDesc,
-                         Vector<HashMap<String, ByteIterator>> results, MutableObject<String> nextKey) {
+    public int readIndex(String table, String key, String indexKey, int limit,
+                         Vector<Map<String, ByteIterator>> results, MutableObject<String> nextKey) {
         delay();
 
         if (verbose) {
@@ -212,11 +213,14 @@ public class BasicDB extends DB {
     }
 
     @Override
-    public int multiInsertIndex(String table, Set<String> keys, String indexKey, HashMap<String, ByteIterator> values) {
+    public int multiInsertIndex(String table, Set<String> keys, String indexKey, Map<String, ByteIterator> values) {
         delay();
 
         if (verbose) {
-            System.out.println("insertIndex " + table + " " + Arrays.toString(keys.toArray()) + " " + indexKey);
+            System.out.println(
+                    "insertIndex " + table + " " + StringUtils.join(keys.toArray(), ", ") + " " + indexKey + "\n" +
+                    "keys: " + StringUtils.join(values.keySet().toArray(), ", ") + "\n" +
+                    "vals: " + StringUtils.join(values.values().toArray(), "<---->"));
         }
 
         return 0;

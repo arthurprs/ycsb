@@ -28,8 +28,8 @@ workload=com.yahoo.ycsb.workloads.ActivityStreamWorkload
 
 readallfields=true
 
-readproportion=0.5
-insertproportion=0.5
+readproportion=1
+insertproportion=0
 
-requestdistribution=zipfian
+requestdistribution=uniform
 

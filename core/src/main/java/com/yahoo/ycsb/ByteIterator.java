@@ -44,6 +44,8 @@ import java.util.ArrayList;
  */
 public abstract class ByteIterator implements Iterator<Byte> {
 
+    private String asString;
+
 	@Override
 	public abstract boolean hasNext();
 
@@ -73,9 +75,11 @@ public abstract class ByteIterator implements Iterator<Byte> {
 
 	/** Consumes remaining contents of this object, and returns them as a string. */
 	public String toString() {
+        if (asString != null)
+            return asString;
 		StringBuilder sb = new StringBuilder();
 		while(this.hasNext()) { sb.append((char)nextByte()); }
-		return sb.toString();
+		return asString = sb.toString();
 	}
 	/** Consumes remaining contents of this object, and returns them as a byte array. */
 	public byte[] toArray() {

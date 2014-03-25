@@ -17,10 +17,7 @@
 
 package com.yahoo.ycsb;
 
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import com.yahoo.ycsb.measurements.Measurements;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -93,10 +90,11 @@ public class DBWrapper extends DB {
      * Called once per DB instance; there is one DB instance per client thread.
      */
     public void cleanup() throws DBException {
-        long st=System.nanoTime();
+//        DISABLED
+//        long st=System.nanoTime();
         _db.cleanup();
-        long en=System.nanoTime();
-        _measurements.measure("CLEANUP", (int)((en-st)/1000));
+//        long en=System.nanoTime();
+//        _measurements.measure("CLEANUP", (int)((en-st)/1000));
     }
 
     /**
@@ -244,12 +242,12 @@ public class DBWrapper extends DB {
         return res;
     }
 
-    public int readIndex(String table, String key, String indexKey, int limit, boolean orderDesc,
-                         Vector<HashMap<String, ByteIterator>> results, MutableObject<String> nextKey) {
-        return _db.readIndex(table, key, indexKey, limit, orderDesc, results, nextKey);
+    public int readIndex(String table, String key, String indexKey, int limit,
+                         Vector<Map<String,ByteIterator>> results, MutableObject<String> nextKey) {
+        return _db.readIndex(table, key, indexKey, limit, results, nextKey);
     }
 
-    public int multiInsertIndex(String table, Set<String> keys, String indexKey, HashMap<String, ByteIterator> values) {
+    public int multiInsertIndex(String table, Set<String> keys, String indexKey, Map<String, ByteIterator> values) {
         return _db.multiInsertIndex(table, keys, indexKey, values);
     }
 

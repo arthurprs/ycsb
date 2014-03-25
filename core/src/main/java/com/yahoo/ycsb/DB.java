@@ -19,10 +19,7 @@ package com.yahoo.ycsb;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * A layer for accessing a database to be benchmarked. Each thread in the client
@@ -145,12 +142,12 @@ public abstract class DB
 
     /* The following are used to implement ycsb workload for activity streams */
 
-    public int readIndex(String table, String key, String indexKey, int limit, boolean orderDesc,
-                         Vector<HashMap<String, ByteIterator>> results, MutableObject<String> nextKey) {
+    public int readIndex(String table, String key, String indexKey, int limit,
+                         Vector<Map<String, ByteIterator>> results, MutableObject<String> nextKey) {
         throw new UnsupportedClassVersionError("not implemented");
     }
 
-    public int multiInsertIndex(String table, Set<String> keys, String indexKey, HashMap<String, ByteIterator> values) {
+    public int multiInsertIndex(String table, Set<String> keys, String indexKey, Map<String, ByteIterator> values) {
         throw new UnsupportedClassVersionError("not implemented");
     }
 }
